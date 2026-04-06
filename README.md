@@ -1,13 +1,14 @@
 # nvim-pi
- 
-A small Neovim plugin to keep pi in a side terminal.
+
+A small Neovim plugin to work with pi in a side terminal.
 
 ## Features
 
-- opens pi in a right-side terminal split
-- toggles that split on and off
-- runs `:checktime` on common editor events so files edited by pi are reloaded
-- provides `:PiInlineEdit` for quick file-local edits through hidden pi RPC
+- Spawn Pi in a side terminal
+- Auto-reload files after Pi updates them
+- Inline edits from the buffer
+- Ask questions from the buffer
+- Explain LSP diagnostics
 
 ## Requirements
 
@@ -33,69 +34,49 @@ With lazy.nvim:
 require("nvim-pi").setup({
   command = { "pi" },
   width = 80,
+  -- require: vim.o.autoread = true
   auto_reload = true,
   inline_edit = {
     command = { "pi" },
+    -- format "provider/model", compatible with pi
     model = nil,
     thinking = "off",
   },
 })
 ```
 
+No default keybindings, you can add them in your config:
+
+```lua
+vim.keymap.set({ "n", "t" }, "<C-n>", "<cmd>PiToggle<cr>", {
+  desc = "Toggle pi",
+})
+```
+
 ## Commands
 
-- `:Pi`
-- `:PiToggle`
-- `:PiOpen`
-- `:PiClose`
-- `:PiInlineEdit`
+- `:Pi`: Open/show Pi terminal
+- `:PiOpen`: Same
+- `:PiToggle`: Toggle Pi terminal
+- `:PiClose`: Close Pi terminal
+- `:PiInlineEdit`: One-shot edit from the buffer
+- `:PiAsk`: Prompt for a question, open the Pi terminal, and send the question with file path and cursor position
+- `:PiExplain`: Open the Pi terminal and send LSP diagnostics of the current line
 
-`PiInlineEdit` prompts for an instruction, sends the current saved file and cursor position to a hidden pi RPC process, then reloads the file if pi changed it.
+### `PiInlineEdit`
 
-## Configuration
+What it does:
 
-### `command`
+- Prompt for an instruction
+- Send the current saved file and cursor position to a hidden pi RPC process not linked to your Pi session
+- After the agent changes the file, it will be reloaded automatically
 
-Command used to start pi. It is passed to `jobstart()`.
+You can customize the model and thinking level, usually no thinking and a fast model. By default, it uses the current Pi model and no thinking.
+Save your current buffer before calling `PiInlineEdit`.
+Do not make changes while the query is pending or the result will be discarded.
 
-```lua
-require("nvim-pi").setup({
-  command = { "pi", "/path/to/project" },
-})
-```
+## Disclaimer
 
-### `width`
-
-Width of the side split.
-
-```lua
-require("nvim-pi").setup({
-  width = 60,
-})
-```
-
-### `auto_reload`
-
-Enables the autocmds that call `:checktime`.
-
-```lua
-require("nvim-pi").setup({
-  auto_reload = false,
-})
-```
-
-### `inline_edit`
-
-Configuration for `:PiInlineEdit`.
-
-```lua
-require("nvim-pi").setup({
-  inline_edit = {
-    command = { "pi" },
-    model = "fast",
-    thinking = "off",
-  },
-})
-```
-
-`command` starts the hidden RPC process. `model` is passed as `--model`. `thinking` is sent through RPC with `set_thinking_level`.
+This plugin is mainly developed by an AI agent, nothing very valuable.
+I only plan to add features that suit my workflow and nothing more.
+If you want to add new features, fork the repo.
